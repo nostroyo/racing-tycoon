@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boardurance - Hyper-Casual Racing Strategy</title>
+    <meta name="description" content="Real-time racing strategy game with 8-bit bird's-eye view. Make data-driven decisions in 3-5 minute sessions.">
+    <link rel="stylesheet" href="/landing-page/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX');
+        
+        // Track page view
+        gtag('event', 'page_view', {
+            page_title: 'Landing Page',
+            page_location: window.location.href,
+            page_path: window.location.pathname
+        });
+    </script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <span class="logo-icon">🏎️</span>
+                <span class="logo-text">BOARDURANCE</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#waitlist" class="cta-button-nav">Join Waitlist</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Race Strategy. <span class="highlight">Data-Driven.</span></h1>
+                <p class="hero-subtitle">Make real-time decisions in hyper-casual 3-5 minute racing sessions. 8-bit bird's-eye view, boost cards, and pit strategy.</p>
+                
+                <div class="hero-stats">
+                    <div class="stat">
+                        <div class="stat-number">3-5</div>
+                        <div class="stat-label">Minute Sessions</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">8-bit</div>
+                        <div class="stat-label">Visual Style</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">Real-time</div>
+                        <div class="stat-label">Data Decisions</div>
+                    </div>
+                </div>
+
+                <div class="hero-cta">
+                    <button class="cta-button-primary" id="join-waitlist-btn">
+                        Join Waitlist for Early Access
+                    </button>
+                    <p class="cta-note">First 500 get exclusive founder rewards</p>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="game-preview">
+                    <div class="pixel-grid">
+                        <!-- 8-bit game preview -->
+                        <div class="pixel-row">
+                            <div class="pixel car-player"></div>
+                            <div class="pixel"></div>
+                            <div class="pixel car-competitor"></div>
+                        </div>
+                        <div class="pixel-row">
+                            <div class="pixel"></div>
+                            <div class="pixel track"></div>
+                            <div class="pixel"></div>
+                        </div>
+                        <div class="pixel-row">
+                            <div class="pixel car-competitor"></div>
+                            <div class="pixel"></div>
+                            <div class="pixel car-player"></div>
+                        </div>
+                    </div>
+                    <div class="preview-stats">
+                        <div class="preview-stat">LAP: 12/50</div>
+                        <div class="preview-stat">POS: P5</div>
+                        <div class="preview-stat">BOOST: 🟢🟢🟡</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Value Proposition -->
+    <section class="value-prop" id="features">
+        <div class="container">
+            <h2 class="section-title">Real-Time Data, Real Strategy</h2>
+            <p class="section-subtitle">Hyper-casual meets deep strategy in bite-sized racing sessions</p>
+            
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Data-Driven Decisions</h3>
+                    <p class="feature-desc">Real-time tire wear, fuel levels, and competitor analysis to make strategic calls.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎮</div>
+                    <h3 class="feature-title">3-5 Minute Sessions</h3>
+                    <p class="feature-desc">Perfect for quick breaks. Complete races during your commute or coffee break.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">👁️</div>
+                    <h3 class="feature-title">8-bit Bird's-Eye View</h3>
+                    <p class="feature-desc">Simple, clean visualization showing relative positions and gaps at a glance.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🃏</div>
+                    <h3 class="feature-title">Boost Card System</h3>
+                    <p class="feature-desc">Strategic card-based boosts for overtaking, defense, and pit stop optimization.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title">Quick Start, Deep Game</h2>
+            <p class="section-subtitle">Get racing in seconds, discover strategy over time</p>
+            
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Choose Your Car</h3>
+                        <p>Pick between Curve Specialist, Straight Expert, or Balanced based on track type.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Manage Race Strategy</h3>
+                        <p>Monitor tire wear, fuel levels, and competitor gaps. Time your boosts and pit stops.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Climb Positions</h3>
+                        <p>Make strategic decisions to gain positions. Each choice impacts your final result.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Review & Improve</h3>
+                        <p>Get graded on tire management, boost usage, and pit strategy. Learn and improve.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof / Dev Diaries -->
+    <section class="social-proof">
+        <div class="container">
+            <h2 class="section-title">Behind The Scenes</h2>
+            <p class="section-subtitle">Follow our development journey</p>
+            
+            <div class="diary-grid">
+                <div class="diary-entry">
+                    <div class="diary-date">2026-03-27</div>
+                    <h3 class="diary-title">Landing Page Launch</h3>
+                    <p class="diary-excerpt">Building the waitlist and analytics system for our MVP launch. Focus on mobile-first design and quick onboarding.</p>
+                </div>
+                <div class="diary-entry">
+                    <div class="diary-date">2026-03-26</div>
+                    <h3 class="diary-title">8-bit Visualization Complete</h3>
+                    <p class="diary-excerpt">Finalized the bird's-eye view system showing relative car positions and gap times in clean 8-bit style.</p>
+                </div>
+                <div class="diary-entry">
+                    <div class="diary-date">2026-03-25</div>
+                    <h3 class="diary-title">Core Game Systems</h3>
+                    <p class="diary-excerpt">State management, simulation engine, and game controller implemented. Ready for UI layer.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Waitlist Section -->
+    <section class="waitlist" id="waitlist">
+        <div class="container">
+            <div class="waitlist-card">
+                <h2 class="waitlist-title">Join the Early Access Waitlist</h2>
+                <p class="waitlist-subtitle">Be among the first to experience Boardurance. Get exclusive founder rewards and shape the game's development.</p>
+                
+                <form id="waitlist-form" class="waitlist-form">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="persona">What best describes you?</label>
+                        <select id="persona" name="persona">
+                            <option value="">Select one...</option>
+                            <option value="f1_fan">F1 / Motorsport Fan</option>
+                            <option value="strategy_gamer">Strategy Game Enthusiast</option>
+                            <option value="mobile_gamer">Mobile Gamer</option>
+                            <option value="casual_gamer">Casual Gamer</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="region">Region</label>
+                        <select id="region" name="region">
+                            <option value="">Select region...</option>
+                            <option value="na">North America</option>
+                            <option value="eu">Europe</option>
+                            <option value="asia">Asia</option>
+                            <option value="sa">South America</option>
+                            <option value="oceania">Oceania</option>
+                            <option value="africa">Africa</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="updates" name="updates" checked>
+                        <label for="updates">Send me development updates and beta invitations</label>
+                    </div>
+                    
+                    <button type="submit" class="cta-button-primary form-submit">
+                        Join Waitlist
+                    </button>
+                    
+                    <p class="form-note">We respect your privacy. No spam, ever.</p>
+                </form>
+                
+                <div class="waitlist-stats">
+                    <div class="waitlist-stat">
+                        <div class="waitlist-stat-number" id="waitlist-count">0</div>
+                        <div class="waitlist-stat-label">Already Joined</div>
+                    </div>
+                    <div class="waitlist-stat">
+                        <div class="waitlist-stat-number">500</div>
+                        <div class="waitlist-stat-label">Founder Spots Left</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span class="logo-icon">🏎️</span>
+                        <span class="logo-text">BOARDURANCE</span>
+                    </div>
+                    <p class="footer-tagline">Hyper-casual racing strategy for the data-driven fan.</p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Game</h4>
+                        <a href="#">Features</a>
+                        <a href="#">How It Works</a>
+                        <a href="#">Scenarios</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Company</h4>
+                        <a href="#">Dev Diaries</a>
+                        <a href="#">About</a>
+                        <a href="#">Contact</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 Boardurance. All rights reserved. This is an independent fan project, not affiliated with F1.</p>
+                <div class="footer-social">
+                    <a href="#" class="social-link">Twitter</a>
+                    <a href="#" class="social-link">Discord</a>
+                    <a href="#" class="social-link">GitHub</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Waitlist Modal -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🎉 You're on the List!</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Thanks for joining the Boardurance waitlist! We'll send you a confirmation email shortly.</p>
+                <p>Keep an eye on your inbox for:</p>
+                <ul>
+                    <li>Early access invitations</li>
+                    <li>Development updates</li>
+                    <li>Exclusive founder rewards</li>
+                </ul>
+                <button class="cta-button-primary modal-close-btn">Awesome!</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/landing-page/script.js"></script>
+</body>
+</html>
