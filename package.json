@@ -1,0 +1,22 @@
+{
+  "name": "boardurance",
+  "version": "0.1.0",
+  "description": "Hyper-casual racing management game with 8-bit bird's-eye view",
+  "main": "src/core/game.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && gh-pages -d dist",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": ["racing", "strategy", "8-bit", "hyper-casual", "f1"],
+  "author": "Yoann",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "gh-pages": "^6.0.0"
+  }
+}
