@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boardurance - Hyper-Casual Racing Strategy</title>
+    <link rel="stylesheet" href="src/style.css">
+    <link rel="icon" type="image/x-icon" href="public/images/favicon.ico">
+</head>
+<body>
+    <div id="app">
+        <!-- Screens will be managed by JavaScript -->
+        <div id="screen-container">
+            <!-- Screen content will be injected here -->
+        </div>
+    </div>
+
+    <!-- Game Core -->
+    <script type="module" src="src/core/game.js"></script>
+    <script type="module" src="src/core/state.js"></script>
+    <script type="module" src="src/core/simulation.js"></script>
+    
+    <!-- UI Components -->
+    <script type="module" src="src/ui/screens.js"></script>
+    <script type="module" src="src/ui/8bit-view.js"></script>
+    <script type="module" src="src/ui/boost-cards.js"></script>
+    <script type="module" src="src/ui/car-characteristics.js"></script>
+    
+    <!-- Scenarios -->
+    <script type="module" src="src/scenarios/monaco-lap38.js"></script>
+</body>
+</html>
