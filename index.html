@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Boardurance - Hyper-Casual Racing Strategy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+        }
+        .logo {
+            font-size: 4rem;
+            margin: 2rem 0;
+        }
+        h1 {
+            font-size: 3rem;
+            color: #f59e0b;
+            margin-bottom: 1rem;
+        }
+        .tagline {
+            font-size: 1.5rem;
+            opacity: 0.9;
+            margin-bottom: 3rem;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .cta {
+            background: #f59e0b;
+            color: #0f172a;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 2rem 0;
+            transition: transform 0.2s;
+        }
+        .cta:hover {
+            transform: translateY(-2px);
+        }
+        .status {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 2rem;
+            font-family: monospace;
+        }
+        .success {
+            color: #10b981;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🏎️</div>
+        <h1>BOARDURANCE</h1>
+        <p class="tagline">Hyper-casual racing strategy with 8-bit bird's-eye view</p>
+        
+        <div class="features">
+            <div class="feature">
+                <h3>3-5 Minute Sessions</h3>
+                <p>Perfect for quick breaks during your day.</p>
+            </div>
+            <div class="feature">
+                <h3>Data-Driven Decisions</h3>
+                <p>Real-time tire wear, fuel levels, competitor analysis.</p>
+            </div>
+            <div class="feature">
+                <h3>8-bit Visualization</h3>
+                <p>Clean bird's-eye view showing relative positions.</p>
+            </div>
+        </div>
+        
+        <button class="cta" onclick="showWaitlist()">Join Waitlist for Early Access</button>
+        
+        <div class="status" id="status">
+            <p class="success">✅ Landing page deployed successfully!</p>
+            <p>GitHub Pages is working correctly.</p>
+            <p>Full waitlist functionality coming soon.</p>
+        </div>
+    </div>
+
+    <script>
+        function showWaitlist() {
+            document.getElementById('status').innerHTML = `
+                <p class="success">🎉 Waitlist coming soon!</p>
+                <p>We're preparing the full landing page with waitlist form.</p>
+                <p>Check back in a few minutes for updates.</p>
+            `;
+        }
+        
+        console.log('Boardurance landing page loaded successfully');
+        console.log('GitHub Pages deployment confirmed');
+    </script>
+</body>
+</html>
