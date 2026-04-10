@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FZERO — Play Now</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #0a0c12;
+      --surface:  #13161f;
+      --border:   #1e2433;
+      --red:      #ef4444;
+      --teal:     #14b8a6;
+      --amber:    #f59e0b;
+      --blue:     #3b82f6;
+      --green:    #22c55e;
+      --gray:     #64748b;
+      --text:     #e2e8f0;
+      --muted:    #94a3b8;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { height:100%; }
+    body {
+      font-family: 'Roboto Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── Layout ── */
+    .screen { display:none; width:100%; max-width:560px; padding:24px 16px; }
+    .screen.active { display:block; }
+
+    /* ── Typography ── */
+    .pixel { font-family: 'Press Start 2P', monospace; }
+    h1.pixel { font-size:1.6rem; color:var(--amber); letter-spacing:2px; }
+    h2.pixel { font-size:1rem; color:var(--text); }
+    .muted { color:var(--muted); font-size:0.75rem; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      cursor: pointer;
+      transition: border-color 0.15s, transform 0.1s;
+      user-select: none;
+    }
+    .card:hover { border-color: var(--gray); transform: translateY(-1px); }
+    .card.selected { border-color: var(--amber); }
+    .card-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:12px 0; }
+
+    /* ── Stat bars ── */
+    .stat-row { display:flex; align-items:center; gap:8px; margin:4px 0; font-size:0.7rem; }
+    .stat-label { width:60px; color:var(--muted); text-transform:uppercase; }
+    .bar-track { flex:1; background:var(--border); border-radius:4px; height:8px; }
+    .bar-fill  { height:8px; border-radius:4px; transition:width 0.3s; }
+    .bar-straight { background: var(--blue); }
+    .bar-curve    { background: var(--teal); }
+    .bar-maneuv   { background: var(--green); }
+    .bar-quick    { background: var(--amber); }
+    .stat-val { width:24px; text-align:right; color:var(--text); font-size:0.7rem; }
+
+    /* ── Buttons ── */
+    .btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size:0.6rem;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing:1px;
+    }
+    .btn:hover:not(:disabled) { opacity:0.85; transform:translateY(-1px); }
+    .btn:active:not(:disabled) { transform:translateY(0); }
+    .btn:disabled { opacity:0.3; cursor:not-allowed; }
+    .btn-primary  { background:var(--amber); color:#0a0c12; width:100%; margin-top:16px; }
+    .btn-safe     { background:var(--teal);  color:#0a0c12; flex:1; }
+    .btn-attack   { background:var(--red);   color:#fff;    flex:1; }
+    .btn-pit      { background:var(--blue);  color:#fff;    flex:1; }
+    .btn-boost    { background:var(--amber); color:#0a0c12; flex:1; }
+    .btn-next     { background:var(--surface); color:var(--text); border:2px solid var(--border); flex:1; }
+    .btn-again    { background:var(--green);  color:#0a0c12; width:100%; margin-top:16px; }
+    .btn-row      { display:flex; gap:10px; margin-top:12px; }
+
+    /* ── Setup screen ── */
+    .setup-section { margin:20px 0; }
+    .section-label { font-size:0.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:2px; margin-bottom:8px; }
+
+    /* ── Quali screen ── */
+    .quali-formula {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:8px; padding:16px; margin:16px 0; font-size:0.75rem; line-height:2;
+    }
+    .formula-line { display:flex; justify-content:space-between; }
+    .formula-line span:last-child { color:var(--amber); font-weight:700; }
+    .formula-total {
+      border-top:1px solid var(--border); margin-top:8px; padding-top:8px;
+      font-size:0.85rem; display:flex; justify-content:space-between;
+    }
+    .formula-total span:last-child { color:var(--amber); font-family:'Press Start 2P',monospace; }
+    .quali-choice-label { font-size:0.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:2px; margin:16px 0 8px; }
+    .roll-result {
+      background:var(--surface); border:2px solid var(--border); border-radius:8px;
+      padding:16px; margin:12px 0; text-align:center; display:none;
+    }
+    .roll-result.show { display:block; }
+    .roll-big { font-family:'Press Start 2P',monospace; font-size:2rem; margin:8px 0; }
+    .roll-big.success { color:var(--green); }
+    .roll-big.failure { color:var(--red); }
+    .quali-position {
+      text-align:center; margin:16px 0;
+      font-family:'Press Start 2P',monospace; font-size:1.2rem; color:var(--amber);
+    }
+
+    /* ── Race screen ── */
+    .race-header {
+      display:grid; grid-template-columns:1fr 1fr 1fr;
+      gap:8px; margin-bottom:16px;
+    }
+    .race-stat {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:8px; padding:10px; text-align:center;
+    }
+    .race-stat-val { font-family:'Press Start 2P',monospace; font-size:0.9rem; color:var(--amber); }
+    .race-stat-label { font-size:0.55rem; color:var(--muted); margin-top:4px; text-transform:uppercase; }
+
+    .segment-banner {
+      text-align:center; padding:14px;
+      border-radius:8px; margin:12px 0;
+      font-family:'Press Start 2P',monospace; font-size:0.75rem; letter-spacing:1px;
+    }
+    .segment-banner.curve    { background:#0f2744; border:2px solid var(--teal); color:var(--teal); }
+    .segment-banner.straight { background:#1a1000; border:2px solid var(--amber); color:var(--amber); }
+
+    /* ── Boost cards ── */
+    .boost-row { display:flex; gap:5px; justify-content:center; margin:10px 0; flex-wrap:wrap; }
+    .boost-card {
+      width:24px; height:36px; border-radius:4px;
+      border:2px solid var(--amber); background:var(--amber);
+      transition:all 0.2s; position:relative;
+      display:flex; align-items:flex-end; justify-content:center; padding-bottom:2px;
+    }
+    .boost-card .bc-val {
+      font-family:'Press Start 2P',monospace; font-size:0.4rem; color:#0a0c12; font-weight:700;
+    }
+    .boost-card.used { background:var(--surface); border-color:var(--border); }
+    .boost-card.used .bc-val { color:var(--border); }
+    .boost-card.soft   { border-color:#ef4444; background:#ef4444; }
+    .boost-card.medium { border-color:#f59e0b; background:#f59e0b; }
+    .boost-card.hard   { border-color:#94a3b8; background:#94a3b8; }
+    .boost-card.soft.used, .boost-card.medium.used, .boost-card.hard.used {
+      background:var(--surface); border-color:var(--border);
+    }
+
+    /* ── Position grid ── */
+    .position-grid { margin:12px 0; }
+    .pos-row {
+      display:flex; align-items:center; gap:10px;
+      padding:7px 10px; border-radius:6px;
+      margin:3px 0; font-size:0.72rem;
+      transition:all 0.3s;
+    }
+    .pos-row.player { background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.4); }
+    .pos-row.pitting { opacity:0.5; font-style:italic; }
+    .pos-num { width:28px; color:var(--muted); font-size:0.65rem; }
+    .pos-num.top3 { color:var(--amber); font-weight:700; }
+    .pos-car { flex:1; }
+    .pos-car.player-name { color:var(--red); font-weight:700; }
+    .pos-delta { width:32px; text-align:right; font-size:0.65rem; }
+    .pos-delta.up   { color:var(--green); }
+    .pos-delta.down { color:var(--red); }
+    .pos-delta.same { color:var(--gray); }
+
+    /* ── Tyre picker (shown when pitting) ── */
+    .tyre-picker {
+      background:var(--surface); border:1px solid var(--blue);
+      border-radius:8px; padding:12px; margin:10px 0; display:none;
+    }
+    .tyre-picker.show { display:block; }
+    .tyre-picker-label {
+      font-size:0.55rem; color:var(--blue); text-transform:uppercase;
+      letter-spacing:2px; margin-bottom:10px; text-align:center;
+    }
+    .tyre-picker-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+    .tyre-option {
+      background:var(--bg); border:1px solid var(--border);
+      border-radius:6px; padding:10px 6px; text-align:center;
+      cursor:pointer; transition:border-color 0.15s;
+    }
+    .tyre-option:hover { border-color:var(--gray); }
+    .tyre-option.selected { border-color:var(--amber); }
+    .tyre-option-emoji { font-size:1rem; }
+    .tyre-option-name { font-family:'Press Start 2P',monospace; font-size:0.4rem; margin:4px 0; }
+    .tyre-option-stat { font-size:0.6rem; color:var(--muted); }
+    .tyre-option-current { font-size:0.5rem; color:var(--amber); margin-top:3px; }
+    .btn-pit-confirm {
+      font-family:'Press Start 2P',monospace; font-size:0.55rem;
+      background:var(--blue); color:#fff;
+      border:none; border-radius:6px; padding:10px;
+      width:100%; margin-top:8px; cursor:pointer;
+      transition:opacity 0.15s;
+    }
+    .btn-pit-confirm:hover { opacity:0.85; }
+    .btn-pit-cancel {
+      font-family:'Press Start 2P',monospace; font-size:0.45rem;
+      background:transparent; color:var(--muted);
+      border:1px solid var(--border); border-radius:6px; padding:8px;
+      width:100%; margin-top:4px; cursor:pointer;
+    }
+
+    /* ── Race actions ── */
+    .action-area { margin-top:12px; }
+    .action-info { font-size:0.65rem; color:var(--muted); text-align:center; margin:8px 0; }
+
+    /* ── Turn result ── */
+    .turn-result {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:8px; padding:12px; margin:10px 0;
+      font-size:0.72rem; text-align:center; display:none;
+    }
+    .turn-result.show { display:block; }
+
+    /* ── Results screen ── */
+    .result-position {
+      text-align:center; padding:24px 0;
+    }
+    .result-pos-num {
+      font-family:'Press Start 2P',monospace;
+      font-size:3rem; color:var(--amber);
+    }
+    .result-pos-label { font-size:0.7rem; color:var(--muted); margin-top:8px; }
+    .result-rating {
+      text-align:center; font-family:'Press Start 2P',monospace;
+      font-size:0.85rem; margin:8px 0; padding:10px;
+      border-radius:8px;
+    }
+    .result-stats {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:8px; padding:16px; margin:16px 0;
+    }
+    .result-stat-row {
+      display:flex; justify-content:space-between;
+      font-size:0.72rem; padding:6px 0;
+      border-bottom:1px solid var(--border);
+    }
+    .result-stat-row:last-child { border-bottom:none; }
+    .result-stat-row span:last-child { color:var(--amber); }
+
+    /* ── Divider ── */
+    .divider { border:none; border-top:1px solid var(--border); margin:16px 0; }
+
+    /* ── Anim ── */
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .pulse { animation: pulse 1s infinite; }
+
+    @media(max-width:400px) {
+      h1.pixel { font-size:1.2rem; }
+      .card-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+<div style="position:fixed;top:12px;left:12px;z-index:999;">
+  <a href="index.html" style="font-family:'Press Start 2P',monospace;font-size:0.5rem;
+    color:var(--muted);text-decoration:none;opacity:0.6;">← BACK</a>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN 1 — SETUP
+════════════════════════════════════════════════ -->
+<div id="screen-setup" class="screen active">
+  <h1 class="pixel" style="margin-bottom:4px;">FZERO</h1>
+  <p class="muted" style="margin-bottom:24px;">Pick your team. Race starts immediately.</p>
+
+  <div class="setup-section">
+    <div class="section-label">Choose your car</div>
+    <div class="card-grid" id="car-grid"></div>
+  </div>
+
+  <div class="setup-section">
+    <div class="section-label">Choose your pilot</div>
+    <div class="card-grid" id="pilot-grid"></div>
+  </div>
+
+  <div class="setup-section">
+    <div class="section-label">Choose your tyre</div>
+    <div class="card-grid" id="tire-grid"></div>
+  </div>
+
+  <button class="btn btn-primary" id="btn-to-quali" onclick="goToQuali()" disabled>
+    GO TO QUALIFYING →
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN 2 — QUALIFYING
+════════════════════════════════════════════════ -->
+<div id="screen-quali" class="screen">
+  <h2 class="pixel" style="margin-bottom:4px;">QUALIFYING</h2>
+  <p class="muted" style="margin-bottom:16px;" id="quali-subtitle"></p>
+
+  <div class="quali-formula" id="quali-formula"></div>
+
+  <div class="quali-choice-label">Your qualifying style</div>
+  <div class="btn-row">
+    <button class="btn btn-safe"   onclick="runQuali('safe')">🛡 SAFE</button>
+    <button class="btn btn-attack" onclick="runQuali('attack')">⚡ ATTACK</button>
+  </div>
+  <p class="muted" style="margin-top:8px;font-size:0.65rem;">
+    SAFE: +Quickness×1 &nbsp;|&nbsp; ATTACK: D100 vs Maneuv → ×2 or ÷2
+  </p>
+
+  <div class="roll-result" id="roll-result"></div>
+  <div class="quali-position" id="quali-position"></div>
+
+  <button class="btn btn-primary" id="btn-start-race" onclick="startRace()" style="display:none;">
+    START RACE →
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN 3 — RACE
+════════════════════════════════════════════════ -->
+<div id="screen-race" class="screen">
+  <div id="race-gp-title" class="pixel" style="font-size:0.5rem;color:var(--muted);text-align:center;margin-bottom:10px;"></div>
+  <div class="race-header">
+    <div class="race-stat">
+      <div class="race-stat-val" id="turn-display">1/10</div>
+      <div class="race-stat-label">Turn</div>
+    </div>
+    <div class="race-stat">
+      <div class="race-stat-val" id="position-display">P—</div>
+      <div class="race-stat-label">Position</div>
+    </div>
+    <div class="race-stat">
+      <div class="boost-row" id="boost-display"></div>
+      <div class="race-stat-label">Boost cards</div>
+    </div>
+  </div>
+
+  <div class="segment-banner" id="segment-banner">— SEGMENT —</div>
+
+  <div class="position-grid" id="position-grid"></div>
+
+  <div class="turn-result" id="turn-result"></div>
+
+  <!-- Tyre picker — shown when player clicks PIT -->
+  <div class="tyre-picker" id="tyre-picker">
+    <div class="tyre-picker-label">🔧 Choose your next tyre</div>
+    <div class="tyre-picker-grid" id="tyre-picker-grid"></div>
+    <button class="btn-pit-confirm" id="btn-pit-confirm" onclick="confirmPit()">CONFIRM PIT STOP</button>
+    <button class="btn-pit-cancel"  onclick="cancelPit()">CANCEL</button>
+  </div>
+
+  <div class="action-area" id="action-area">
+    <div class="action-info" id="action-info">Choose an action or proceed</div>
+    <div class="btn-row">
+      <button class="btn btn-pit"   id="btn-pit"   onclick="playerPit()">🔧 PIT</button>
+      <button class="btn btn-boost" id="btn-boost" onclick="playerBoost()">⚡ BOOST</button>
+    </div>
+    <div class="btn-row" style="margin-top:6px;">
+      <button class="btn btn-next" id="btn-next" onclick="nextTurn()">NEXT TURN →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCREEN 4 — RESULTS
+════════════════════════════════════════════════ -->
+<div id="screen-results" class="screen">
+  <h2 class="pixel" style="margin-bottom:4px;">RACE OVER</h2>
+  <div id="result-gp" class="pixel" style="font-size:0.45rem;color:var(--muted);margin-bottom:16px;"></div>
+
+  <div class="result-position">
+    <div class="result-pos-num" id="final-position">P?</div>
+    <div class="result-pos-label">Final Position</div>
+  </div>
+
+  <div class="result-rating" id="result-rating"></div>
+
+  <div class="result-stats" id="result-stats"></div>
+
+  <div id="final-grid" style="margin-top:16px;"></div>
+
+  <button class="btn btn-again" onclick="resetGame()">PLAY AGAIN</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     GAME LOGIC
+════════════════════════════════════════════════ -->
+<script>
+// ── DATA ──────────────────────────────────────────
+
+const TIRES = [
+  { id:'soft',   name:'SOFT',   emoji:'🔴', cards:2, boost:5, color:'#ef4444', desc:'2 cards · +5 each' },
+  { id:'medium', name:'MEDIUM', emoji:'🟡', cards:3, boost:3, color:'#f59e0b', desc:'3 cards · +3 each' },
+  { id:'hard',   name:'HARD',   emoji:'⚪', cards:4, boost:2, color:'#94a3b8', desc:'4 cards · +2 each' },
+];
+
+const CARS = [
+  { id:'arrow',  name:'ARROW',  emoji:'⚡', straight:9, curve:3,  desc:'Straight specialist' },
+  { id:'viper',  name:'VIPER',  emoji:'🐍', straight:3, curve:9,  desc:'Curve specialist'    },
+  { id:'apex',   name:'APEX',   emoji:'⭕', straight:6, curve:6,  desc:'All-rounder'         },
+];
+
+const PILOTS = [
+  { id:'ace',   name:'ACE',   emoji:'🎖', maneuverability:90, quickness:60, desc:'Safe & precise'  },
+  { id:'flash', name:'FLASH', emoji:'⚡', maneuverability:50, quickness:95, desc:'Fast but risky'  },
+  { id:'blade', name:'BLADE', emoji:'🗡', maneuverability:75, quickness:80, desc:'Balanced racer'  },
+];
+
+// AI opponents — pre-defined quali scores and race stats
+const AI_OPPONENTS = [
+  { name:'VERSTAPPEN', qualiScore:340, straight:9, curve:9  },
+  { name:'LECLERC',    qualiScore:320, straight:7, curve:9  },
+  { name:'HAMILTON',   qualiScore:305, straight:8, curve:8  },
+  { name:'ALONSO',     qualiScore:290, straight:6, curve:8  },
+  { name:'NORRIS',     qualiScore:275, straight:8, curve:7  },
+  { name:'SAINZ',      qualiScore:260, straight:7, curve:7  },
+  { name:'PIASTRI',    qualiScore:245, straight:6, curve:7  },
+  { name:'RUSSELL',    qualiScore:230, straight:7, curve:6  },
+  { name:'PEREZ',      qualiScore:215, straight:8, curve:5  },
+  { name:'BOTTAS',     qualiScore:195, straight:7, curve:4  },
+];
+
+// Monaco circuit: 10 turns, curve-heavy (7C / 3S)
+const CIRCUIT = {
+  name: 'Monaco',
+  type: 'curve',
+  segments: ['curve','curve','straight','curve','curve','straight','curve','curve','straight','curve'],
+};
+
+// ── CIRCUIT CONFIG ────────────────────────────────
+// Update this block each race weekend — or override via URL params:
+// game.html?gp=Australian+Grand+Prix&flag=🇦🇺&turns=10&curve=40&type=straight
+//
+// curvePct : % of turns that are curves (rest are straights)
+// type      : 'curve' | 'straight' — dominant type, used for qualification
+// ─────────────────────────────────────────────────
+
+const DEFAULT_CIRCUIT = {
+  gp:       'Monaco Grand Prix',
+  flag:     '🇲🇨',
+  turns:    10,
+  curvePct: 70,    // 70% curves → 7C / 3S on 10 turns
+  type:     'curve',
+};
+
+const CIRCUIT = buildCircuit();
+
+function buildCircuit() {
+  const p      = new URLSearchParams(window.location.search);
+  const cfg    = {
+    gp:       p.get('gp')    || DEFAULT_CIRCUIT.gp,
+    flag:     p.get('flag')  || DEFAULT_CIRCUIT.flag,
+    turns:    parseInt(p.get('turns'))   || DEFAULT_CIRCUIT.turns,
+    curvePct: parseInt(p.get('curve'))   || DEFAULT_CIRCUIT.curvePct,
+    type:     p.get('type')  || DEFAULT_CIRCUIT.type,
+  };
+  cfg.segments = generateSegments(cfg.turns, cfg.curvePct);
+  return cfg;
+}
+
+function generateSegments(turns, curvePct) {
+  const curveCount    = Math.round(turns * curvePct / 100);
+  const straightCount = turns - curveCount;
+  const segs = [
+    ...Array(curveCount).fill('curve'),
+    ...Array(straightCount).fill('straight'),
+  ];
+  // Fisher-Yates shuffle for natural distribution
+  for (let i = segs.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [segs[i], segs[j]] = [segs[j], segs[i]];
+  }
+  // Avoid opening with 3+ of same type (cosmetic smoothing)
+  for (let i = 2; i < segs.length; i++) {
+    if (segs[i] === segs[i-1] && segs[i] === segs[i-2]) {
+      for (let j = i + 1; j < segs.length; j++) {
+        if (segs[j] !== segs[i]) { [segs[i], segs[j]] = [segs[j], segs[i]]; break; }
+      }
+    }
+  }
+  return segs;
+}
+
+// Boost value is dynamic — set from selected tire at race start
+
+// ── STATE ─────────────────────────────────────────
+
+let state = {};
+
+function initState() {
+  state = {
+    phase:         'setup',
+    selectedCar:   null,
+    selectedPilot: null,
+    selectedTire:  null,
+    qualiScore:    0,
+    qualiMode:     null,
+    grid:          [],
+    turn:          0,
+    boostCards:    0,   // set from tire on race start
+    positions:     [],
+    turnAction:    null,
+    stats: {
+      boosted:    0,
+      pitted:     0,
+      qualiScore: 0,
+      startPos:   0,
+    },
+  };
+}
+
+// ── SETUP SCREEN ─────────────────────────────────
+
+function renderSetup() {
+  const carGrid = document.getElementById('car-grid');
+  carGrid.innerHTML = CARS.map(car => `
+    <div class="card" id="car-${car.id}" onclick="selectCar('${car.id}')">
+      <div style="text-align:center;margin-bottom:8px;">
+        <div style="font-size:1.4rem;">${car.emoji}</div>
+        <div class="pixel" style="font-size:0.5rem;margin-top:4px;">${car.name}</div>
+        <div class="muted" style="font-size:0.55rem;margin-top:2px;">${car.desc}</div>
+      </div>
+      ${statBar('STR', car.straight, 10, 'straight')}
+      ${statBar('CRV', car.curve,    10, 'curve')}
+    </div>
+  `).join('');
+
+  const pilotGrid = document.getElementById('pilot-grid');
+  pilotGrid.innerHTML = PILOTS.map(p => `
+    <div class="card" id="pilot-${p.id}" onclick="selectPilot('${p.id}')">
+      <div style="text-align:center;margin-bottom:8px;">
+        <div style="font-size:1.4rem;">${p.emoji}</div>
+        <div class="pixel" style="font-size:0.5rem;margin-top:4px;">${p.name}</div>
+        <div class="muted" style="font-size:0.55rem;margin-top:2px;">${p.desc}</div>
+      </div>
+      ${statBar('MNV', p.maneuverability, 100, 'maneuv')}
+      ${statBar('QCK', p.quickness,       100, 'quick')}
+    </div>
+  `).join('');
+
+  const tireGrid = document.getElementById('tire-grid');
+  tireGrid.innerHTML = TIRES.map(t => `
+    <div class="card" id="tire-${t.id}" onclick="selectTire('${t.id}')">
+      <div style="text-align:center;margin-bottom:10px;">
+        <div style="font-size:1.4rem;">${t.emoji}</div>
+        <div class="pixel" style="font-size:0.5rem;margin-top:4px;">${t.name}</div>
+        <div class="muted" style="font-size:0.55rem;margin-top:2px;">${t.desc}</div>
+      </div>
+      <div style="display:flex;gap:3px;justify-content:center;margin-top:6px;flex-wrap:wrap;">
+        ${Array.from({length:t.cards}).map(() =>
+          `<div style="width:18px;height:26px;border-radius:3px;background:${t.color};
+            display:flex;align-items:flex-end;justify-content:center;padding-bottom:2px;">
+            <span style="font-family:'Press Start 2P',monospace;font-size:0.35rem;color:#0a0c12;">+${t.boost}</span>
+          </div>`
+        ).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function statBar(label, val, max, cls) {
+  const pct = Math.round((val / max) * 100);
+  return `
+    <div class="stat-row">
+      <span class="stat-label">${label}</span>
+      <div class="bar-track"><div class="bar-fill bar-${cls}" style="width:${pct}%"></div></div>
+      <span class="stat-val">${val}</span>
+    </div>`;
+}
+
+function selectCar(id) {
+  state.selectedCar = CARS.find(c => c.id === id);
+  document.querySelectorAll('[id^="car-"]').forEach(el => el.classList.remove('selected'));
+  document.getElementById('car-' + id).classList.add('selected');
+  checkSetupReady();
+}
+
+function selectPilot(id) {
+  state.selectedPilot = PILOTS.find(p => p.id === id);
+  document.querySelectorAll('[id^="pilot-"]').forEach(el => el.classList.remove('selected'));
+  document.getElementById('pilot-' + id).classList.add('selected');
+  checkSetupReady();
+}
+
+function selectTire(id) {
+  state.selectedTire = TIRES.find(t => t.id === id);
+  document.querySelectorAll('[id^="tire-"]').forEach(el => el.classList.remove('selected'));
+  document.getElementById('tire-' + id).classList.add('selected');
+  checkSetupReady();
+}
+
+function checkSetupReady() {
+  document.getElementById('btn-to-quali').disabled =
+    !(state.selectedCar && state.selectedPilot && state.selectedTire);
+}
+
+// ── QUALIFYING SCREEN ────────────────────────────
+
+function goToQuali() {
+  showScreen('screen-quali');
+
+  // Update subtitle dynamically
+  const straightPct = 100 - CIRCUIT.curvePct;
+  document.getElementById('quali-subtitle').textContent =
+    `${CIRCUIT.flag} ${CIRCUIT.gp} · ${CIRCUIT.turns} turns · ${CIRCUIT.curvePct}% curves / ${straightPct}% straights`;
+
+  const car   = state.selectedCar;
+  const pilot = state.selectedPilot;
+  const circuitStat = CIRCUIT.type === 'curve' ? car.curve : car.straight;
+  const base = (circuitStat * 10) + pilot.maneuverability;
+
+  // Reset quali UI
+  document.getElementById('roll-result').classList.remove('show');
+  document.getElementById('roll-result').innerHTML = '';
+  document.getElementById('quali-position').innerHTML = '';
+  document.getElementById('btn-start-race').style.display = 'none';
+  document.querySelectorAll('.btn-safe, .btn-attack').forEach(b => b.disabled = false);
+
+  document.getElementById('quali-formula').innerHTML = `
+    <div class="formula-line"><span>Car curve stat × 10</span><span>${circuitStat} × 10 = ${circuitStat * 10}</span></div>
+    <div class="formula-line"><span>Pilot maneuverability</span><span>+ ${pilot.maneuverability}</span></div>
+    <div class="formula-total"><span>BASE SCORE</span><span>${base}</span></div>
+    <div style="margin-top:10px;font-size:0.65rem;color:var(--muted);">
+      SAFE adds +Quickness(${pilot.quickness}) &nbsp;|&nbsp;
+      ATTACK rolls D100 vs Maneuv(${pilot.maneuverability}) → ×2 or ÷2
+    </div>
+  `;
+}
+
+function runQuali(mode) {
+  document.querySelectorAll('.btn-safe, .btn-attack').forEach(b => b.disabled = true);
+
+  const car   = state.selectedCar;
+  const pilot = state.selectedPilot;
+  const circuitStat = CIRCUIT.type === 'curve' ? car.curve : car.straight;
+  const base  = (circuitStat * 10) + pilot.maneuverability;
+
+  let bonus = 0;
+  let rollHtml = '';
+
+  if (mode === 'safe') {
+    bonus = pilot.quickness;
+    rollHtml = `
+      <div style="color:var(--teal);font-size:0.72rem;">Safe lap — no risk taken</div>
+      <div class="roll-big success">+${bonus}</div>
+      <div class="muted">Quickness × 1</div>
+    `;
+  } else {
+    const roll    = Math.floor(Math.random() * 100) + 1;
+    const success = roll <= pilot.maneuverability;
+    bonus = success ? pilot.quickness * 2 : Math.floor(pilot.quickness / 2);
+    rollHtml = `
+      <div style="font-size:0.65rem;color:var(--muted);">D100 roll vs Maneuverability (${pilot.maneuverability})</div>
+      <div class="roll-big ${success ? 'success' : 'failure'}">🎲 ${roll}</div>
+      <div style="font-size:0.72rem;color:${success ? 'var(--green)' : 'var(--red)'}">
+        ${success ? '✓ SUCCESS — Quickness ×2' : '✗ FAILURE — Quickness ÷2'}
+      </div>
+      <div style="font-size:0.85rem;margin-top:4px;color:var(--amber);">+${bonus}</div>
+    `;
+  }
+
+  state.qualiScore = base + bonus;
+  state.qualiMode  = mode;
+  state.stats.qualiScore = state.qualiScore;
+
+  // Build full grid and sort
+  const allEntries = [
+    ...AI_OPPONENTS.map(ai => ({
+      name: ai.name, isPlayer: false,
+      car: { straight: ai.straight, curve: ai.curve },
+      qualiScore: ai.qualiScore,
+    })),
+    {
+      name: 'YOU', isPlayer: true,
+      car: { straight: car.straight, curve: car.curve },
+      qualiScore: state.qualiScore,
+    },
+  ];
+  allEntries.sort((a, b) => b.qualiScore - a.qualiScore);
+  state.grid = allEntries;
+
+  const playerPos = allEntries.findIndex(e => e.isPlayer) + 1;
+  state.stats.startPos = playerPos;
+
+  // Render roll result
+  const rollEl = document.getElementById('roll-result');
+  rollEl.innerHTML = rollHtml;
+  rollEl.classList.add('show');
+
+  // Render grid position
+  document.getElementById('quali-position').innerHTML = `
+    <div class="muted" style="font-size:0.65rem;margin-bottom:4px;">Qualifying result</div>
+    <span>P${playerPos}</span>
+    <div class="muted" style="font-size:0.65rem;margin-top:4px;">Score: ${state.qualiScore}</div>
+  `;
+
+  document.getElementById('btn-start-race').style.display = 'block';
+}
+
+// ── RACE SCREEN ──────────────────────────────────
+
+function startRace() {
+  // Initialise positions from qualifying grid
+  state.positions = state.grid.map((entry, idx) => ({
+    ...entry,
+    position:     idx + 1,
+    prevPosition: idx + 1,
+  }));
+  state.turn       = 0;
+  state.boostCards = state.selectedTire.cards;
+
+  // Regenerate segments fresh for this race
+  CIRCUIT.segments = generateSegments(CIRCUIT.turns, CIRCUIT.curvePct);
+
+  showScreen('screen-race');
+
+  // Show GP name above race header
+  document.getElementById('race-gp-title').textContent = `${CIRCUIT.flag} ${CIRCUIT.gp}`;
+
+  renderTurn();
+}
+
+function renderTurn() {
+  const turn = state.turn; // 0-indexed
+  const seg  = CIRCUIT.segments[turn];
+
+  // Header
+  document.getElementById('turn-display').textContent     = `${turn + 1}/${CIRCUIT.turns}`;
+  document.getElementById('position-display').textContent = `P${getPlayerPosition()}`;
+
+  // Segment banner
+  const banner = document.getElementById('segment-banner');
+  if (seg === 'curve') {
+    banner.className = 'segment-banner curve';
+    banner.innerHTML = '⤵ CURVE SECTION';
+  } else {
+    banner.className = 'segment-banner straight';
+    banner.innerHTML = '⬆ STRAIGHT SECTION';
+  }
+
+  // Boost cards
+  renderBoostCards();
+
+  // Position grid
+  renderPositionGrid();
+
+  // Reset actions
+  state.turnAction = null;
+  document.getElementById('btn-pit').disabled   = false;
+  document.getElementById('btn-boost').disabled = state.boostCards === 0;
+  document.getElementById('turn-result').classList.remove('show');
+  document.getElementById('turn-result').innerHTML = '';
+  document.getElementById('action-info').textContent = 'Choose an action or proceed to next turn';
+}
+
+function renderBoostCards() {
+  const el    = document.getElementById('boost-display');
+  const tire  = state.selectedTire;
+  const total = tire.cards;
+  let html    = '';
+  for (let i = 0; i < total; i++) {
+    const used = i >= state.boostCards;
+    html += `<div class="boost-card ${tire.id} ${used ? 'used' : ''}">
+      <span class="bc-val">${used ? '' : '+' + tire.boost}</span>
+    </div>`;
+  }
+  el.innerHTML = html;
+}
+
+function renderPositionGrid(highlight) {
+  const el   = document.getElementById('position-grid');
+  const list = [...state.positions].sort((a, b) => a.position - b.position);
+
+  el.innerHTML = list.map(entry => {
+    const delta = entry.prevPosition - entry.position; // positive = moved up
+    let deltaHtml = '';
+    if (highlight) {
+      if      (delta > 0) deltaHtml = `<span class="pos-delta up">▲${delta}</span>`;
+      else if (delta < 0) deltaHtml = `<span class="pos-delta down">▼${Math.abs(delta)}</span>`;
+      else                deltaHtml = `<span class="pos-delta same">—</span>`;
+    }
+    const isPitting = state.turnAction === 'pit' && entry.isPlayer;
+    return `
+      <div class="pos-row ${entry.isPlayer ? 'player' : ''} ${isPitting ? 'pitting' : ''}">
+        <span class="pos-num ${entry.position <= 3 ? 'top3' : ''}">P${entry.position}</span>
+        <span class="pos-car ${entry.isPlayer ? 'player-name' : ''}">${entry.name}${isPitting ? ' (pit)' : ''}</span>
+        ${deltaHtml}
+      </div>`;
+  }).join('');
+}
+
+function getPlayerPosition() {
+  return state.positions.find(e => e.isPlayer)?.position ?? '?';
+}
+
+// ── PLAYER ACTIONS ───────────────────────────────
+
+function playerPit() {
+  if (state.turnAction) return;
+
+  // Disable main action buttons while picker is open
+  document.getElementById('btn-pit').disabled   = true;
+  document.getElementById('btn-boost').disabled = true;
+  document.getElementById('btn-next').disabled  = true;
+
+  // Build tyre picker
+  const grid = document.getElementById('tyre-picker-grid');
+  grid.innerHTML = TIRES.map(t => {
+    const isCurrent = t.id === state.selectedTire.id;
+    return `
+      <div class="tyre-option ${isCurrent ? 'selected' : ''}" id="topt-${t.id}" onclick="selectPitTyre('${t.id}')">
+        <div class="tyre-option-emoji">${t.emoji}</div>
+        <div class="tyre-option-name">${t.name}</div>
+        <div class="tyre-option-stat">${t.cards}×+${t.boost}</div>
+        ${isCurrent ? '<div class="tyre-option-current">current</div>' : ''}
+      </div>`;
+  }).join('');
+
+  // Default selection = current tyre
+  state.pitTyreSelection = state.selectedTire.id;
+
+  document.getElementById('tyre-picker').classList.add('show');
+  document.getElementById('action-info').innerHTML =
+    '<span style="color:var(--blue)">🔧 Pit stop — pick your next compound</span>';
+}
+
+function selectPitTyre(id) {
+  state.pitTyreSelection = id;
+  document.querySelectorAll('.tyre-option').forEach(el => el.classList.remove('selected'));
+  document.getElementById('topt-' + id).classList.add('selected');
+}
+
+function confirmPit() {
+  // Apply selected tyre
+  state.selectedTire = TIRES.find(t => t.id === state.pitTyreSelection);
+  state.turnAction   = 'pit';
+
+  document.getElementById('tyre-picker').classList.remove('show');
+  document.getElementById('btn-next').disabled = false;
+  document.getElementById('action-info').innerHTML =
+    `<span style="color:var(--blue)">🔧 Pitting → ${state.selectedTire.emoji} ${state.selectedTire.name} (${state.selectedTire.cards}×+${state.selectedTire.boost}) — dropping to the back</span>`;
+  renderPositionGrid();
+}
+
+function cancelPit() {
+  state.pitTyreSelection = null;
+  document.getElementById('tyre-picker').classList.remove('show');
+  document.getElementById('btn-pit').disabled   = false;
+  document.getElementById('btn-boost').disabled = state.boostCards === 0;
+  document.getElementById('btn-next').disabled  = false;
+  document.getElementById('action-info').textContent = 'Choose an action or proceed to next turn';
+}
+
+function playerBoost() {
+  if (state.turnAction || state.boostCards === 0) return;
+  state.turnAction = 'boost';
+  state.boostCards--;
+  state.stats.boosted++;
+  document.getElementById('btn-pit').disabled   = true;
+  document.getElementById('btn-boost').disabled = true;
+  document.getElementById('action-info').innerHTML =
+    `<span style="color:var(--amber)">⚡ Boost activated — +${state.selectedTire.boost} value this turn</span>`;
+  renderBoostCards();
+}
+
+// ── TURN RESOLUTION ──────────────────────────────
+
+function nextTurn() {
+  const seg     = CIRCUIT.segments[state.turn];
+  const isPit   = state.turnAction === 'pit';
+  const isBoost = state.turnAction === 'boost';
+
+  // Save previous positions
+  state.positions.forEach(e => { e.prevPosition = e.position; });
+
+  // Compute values
+  const valued = state.positions.map(entry => {
+    if (entry.isPlayer && isPit) {
+      return { ...entry, value: -9999 }; // goes to back
+    }
+    const stat    = seg === 'curve' ? entry.car.curve : entry.car.straight;
+    const base    = 80 + 40 + stat;
+    const boost   = entry.isPlayer && isBoost ? state.selectedTire.boost : 0;
+    const noise   = entry.isPlayer ? 0 : (Math.random() * 1.5) - 0.75; // AI variance ±0.75
+    return { ...entry, value: base + boost + noise };
+  });
+
+  // Sort descending by value → assign positions
+  valued.sort((a, b) => b.value - a.value);
+  valued.forEach((entry, idx) => { entry.position = idx + 1; });
+
+  // Handle pit: drop player to last, equally space among any other pitters
+  // (in MVP only player can pit)
+  if (isPit) {
+    const nonPitters = valued.filter(e => !e.isPlayer || !isPit);
+    const pitters    = valued.filter(e =>  e.isPlayer &&  isPit);
+    [...nonPitters, ...pitters].forEach((entry, idx) => { entry.position = idx + 1; });
+  }
+
+  state.positions = valued;
+
+  // Pit effects
+  if (isPit) {
+    state.boostCards = state.selectedTire.cards; // refill to full hand
+    state.stats.pitted++;
+  }
+
+  // Show turn result
+  const playerEntry = state.positions.find(e => e.isPlayer);
+  const delta       = playerEntry.prevPosition - playerEntry.position;
+  let   resultMsg   = '';
+  const seg_label   = seg === 'curve' ? 'Curve' : 'Straight';
+
+  if (isPit) {
+    resultMsg = `<span style="color:var(--blue)">🔧 Pit stop — dropped to P${playerEntry.position} · ${state.selectedTire.emoji} ${state.selectedTire.name} fitted · ${state.boostCards} cards</span>`;
+  } else {
+    const matchNote = (() => {
+      const stat = seg === 'curve' ? state.selectedCar.curve : state.selectedCar.straight;
+      if (stat >= 8) return `<span style="color:var(--green)"> — great match for your car!</span>`;
+      if (stat <= 4) return `<span style="color:var(--red)"> — tough segment for your car</span>`;
+      return '';
+    })();
+    resultMsg = `${seg_label} section${matchNote}<br>`;
+    if      (delta > 0) resultMsg += `<span style="color:var(--green)">▲ Gained ${delta} position${delta>1?'s':''}</span>`;
+    else if (delta < 0) resultMsg += `<span style="color:var(--red)">▼ Lost ${Math.abs(delta)} position${Math.abs(delta)>1?'s':''}</span>`;
+    else                resultMsg += `<span style="color:var(--gray)">Held position P${playerEntry.position}</span>`;
+    if (isBoost) resultMsg += ` <span style="color:var(--amber)">(+${state.selectedTire.boost} boost)</span>`;
+  }
+
+  const resultEl = document.getElementById('turn-result');
+  resultEl.innerHTML = resultMsg;
+  resultEl.classList.add('show');
+
+  // Update grid display with deltas
+  renderPositionGrid(true);
+  document.getElementById('position-display').textContent = `P${getPlayerPosition()}`;
+
+  // Advance turn
+  state.turn++;
+
+  if (state.turn >= CIRCUIT.turns) {
+    // Delay then show results
+    document.getElementById('action-area').innerHTML =
+      '<button class="btn btn-primary" onclick="endRace()">SEE RESULTS →</button>';
+  } else {
+    // Next turn button
+    document.getElementById('action-area').innerHTML = `
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="btn btn-next" onclick="proceedNextTurn()">TURN ${state.turn + 1}/${CIRCUIT.turns} →</button>
+      </div>`;
+    renderBoostCards();
+  }
+}
+
+function proceedNextTurn() {
+  // Hide tyre picker if open
+  document.getElementById('tyre-picker').classList.remove('show');
+  // Restore full action area
+  document.getElementById('action-area').innerHTML = `
+    <div class="action-info" id="action-info">Choose an action or proceed to next turn</div>
+    <div class="btn-row">
+      <button class="btn btn-pit"   id="btn-pit"   onclick="playerPit()">🔧 PIT</button>
+      <button class="btn btn-boost" id="btn-boost" onclick="playerBoost()">⚡ BOOST</button>
+    </div>
+    <div class="btn-row" style="margin-top:6px;">
+      <button class="btn btn-next" id="btn-next" onclick="nextTurn()">NEXT TURN →</button>
+    </div>
+  `;
+  renderTurn();
+}
+
+// ── RESULTS ──────────────────────────────────────
+
+function endRace() {
+  showScreen('screen-results');
+
+  const finalPos  = getPlayerPosition();
+  const startPos  = state.stats.startPos;
+  const posDelta  = startPos - finalPos; // positive = improved
+
+  document.getElementById('final-position').textContent = `P${finalPos}`;
+  document.getElementById('result-gp').textContent = `${CIRCUIT.flag} ${CIRCUIT.gp}`;
+
+  // Rating
+  const ratingEl = document.getElementById('result-rating');
+  let rating, ratingColor;
+  if      (finalPos === 1)  { rating = '🏆 CHAMPION!';       ratingColor = 'var(--amber)'; }
+  else if (finalPos <= 3)   { rating = '🥇 PODIUM FINISH';   ratingColor = 'var(--amber)'; }
+  else if (finalPos <= 5)   { rating = '✅ POINTS FINISH';   ratingColor = 'var(--green)'; }
+  else if (finalPos <= 8)   { rating = '👍 MID-PACK';        ratingColor = 'var(--teal)';  }
+  else                      { rating = '💀 BACKMARKER';       ratingColor = 'var(--gray)';  }
+  ratingEl.textContent     = rating;
+  ratingEl.style.color     = ratingColor;
+  ratingEl.style.border    = `1px solid ${ratingColor}`;
+  ratingEl.style.background = `${ratingColor}18`;
+
+  // Stats
+  const deltaLabel = posDelta > 0 ? `▲ +${posDelta}` : posDelta < 0 ? `▼ ${posDelta}` : '— 0';
+  document.getElementById('result-stats').innerHTML = `
+    <div class="result-stat-row"><span>Car</span><span>${state.selectedCar.emoji} ${state.selectedCar.name}</span></div>
+    <div class="result-stat-row"><span>Pilot</span><span>${state.selectedPilot.emoji} ${state.selectedPilot.name}</span></div>
+    <div class="result-stat-row"><span>Final tyre</span><span>${state.selectedTire.emoji} ${state.selectedTire.name} (${state.selectedTire.cards}×+${state.selectedTire.boost})</span></div>
+    <div class="result-stat-row"><span>Qualifying mode</span><span>${state.qualiMode?.toUpperCase()}</span></div>
+    <div class="result-stat-row"><span>Qualifying score</span><span>${state.stats.qualiScore}</span></div>
+    <div class="result-stat-row"><span>Starting position</span><span>P${startPos}</span></div>
+    <div class="result-stat-row"><span>Position change</span><span>${deltaLabel}</span></div>
+    <div class="result-stat-row"><span>Circuit</span><span>${CIRCUIT.flag} ${CIRCUIT.gp}</span></div>
+    <div class="result-stat-row"><span>Boosts used</span><span>${state.stats.boosted} / ${CIRCUIT.turns}</span></div>
+    <div class="result-stat-row"><span>Pit stops</span><span>${state.stats.pitted}</span></div>
+  `;
+
+  // Final grid
+  const sorted = [...state.positions].sort((a, b) => a.position - b.position);
+  document.getElementById('final-grid').innerHTML = `
+    <div class="section-label">Final standings</div>
+    <div style="margin-top:8px;">
+      ${sorted.map(e => `
+        <div class="pos-row ${e.isPlayer ? 'player' : ''}">
+          <span class="pos-num ${e.position <= 3 ? 'top3' : ''}">P${e.position}</span>
+          <span class="pos-car ${e.isPlayer ? 'player-name' : ''}">${e.name}</span>
+        </div>`).join('')}
+    </div>
+  `;
+}
+
+// ── HELPERS ──────────────────────────────────────
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function resetGame() {
+  initState();
+  renderSetup();
+  // Reset all card selections (car, pilot, tire)
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('btn-to-quali').disabled = true;
+  showScreen('screen-setup');
+}
+
+// ── BOOT ─────────────────────────────────────────
+
+// Set dynamic page title
+document.title = `FZERO — ${CIRCUIT.gp}`;
+
+initState();
+renderSetup();
+</script>
+</body>
+</html>

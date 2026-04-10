@@ -1,118 +1,459 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Boardurance - Hyper-Casual Racing Strategy</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: white;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-            text-align: center;
-        }
-        .logo {
-            font-size: 4rem;
-            margin: 2rem 0;
-        }
-        h1 {
-            font-size: 3rem;
-            color: #f59e0b;
-            margin-bottom: 1rem;
-        }
-        .tagline {
-            font-size: 1.5rem;
-            opacity: 0.9;
-            margin-bottom: 3rem;
-        }
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin: 3rem 0;
-        }
-        .feature {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 2rem;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .cta {
-            background: #f59e0b;
-            color: #0f172a;
-            border: none;
-            padding: 1rem 2rem;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 10px;
-            cursor: pointer;
-            margin: 2rem 0;
-            transition: transform 0.2s;
-        }
-        .cta:hover {
-            transform: translateY(-2px);
-        }
-        .status {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 1rem;
-            border-radius: 10px;
-            margin-top: 2rem;
-            font-family: monospace;
-        }
-        .success {
-            color: #10b981;
-            font-weight: bold;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FZERO — Racing Strategy Game</title>
+  <meta name="description" content="Zero-friction racing strategy game. No download, no signup. Pick your car, qualify, race. Play in 3 seconds.">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #0a0c12;
+      --surface: #13161f;
+      --border:  #1e2433;
+      --red:     #ef4444;
+      --teal:    #14b8a6;
+      --amber:   #f59e0b;
+      --blue:    #3b82f6;
+      --green:   #22c55e;
+      --gray:    #64748b;
+      --text:    #e2e8f0;
+      --muted:   #94a3b8;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Roboto Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .pixel { font-family: 'Press Start 2P', monospace; }
+    .container { max-width: 680px; margin: 0 auto; padding: 0 20px; }
+
+    /* ── NAV ── */
+    nav {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 0;
+    }
+    nav .container {
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .nav-logo { font-family:'Press Start 2P',monospace; font-size:0.8rem; color:var(--amber); }
+    .nav-play {
+      font-family:'Press Start 2P',monospace; font-size:0.55rem;
+      background:var(--amber); color:#0a0c12;
+      padding:10px 16px; border-radius:6px; text-decoration:none;
+      transition:opacity 0.15s;
+    }
+    .nav-play:hover { opacity:0.85; }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 64px 0 48px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-eyebrow {
+      font-size: 0.65rem; color: var(--teal); letter-spacing: 3px;
+      text-transform: uppercase; margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(1.4rem, 5vw, 2.2rem);
+      color: var(--amber);
+      line-height: 1.4;
+      margin-bottom: 20px;
+    }
+    .hero-sub {
+      font-size: 0.9rem; color: var(--muted);
+      max-width: 480px; margin: 0 auto 32px;
+    }
+    .hero-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-play {
+      font-family: 'Press Start 2P', monospace; font-size: 0.65rem;
+      background: var(--amber); color: #0a0c12;
+      padding: 14px 28px; border-radius: 8px; text-decoration: none;
+      transition: opacity 0.15s, transform 0.1s; display: inline-block;
+    }
+    .btn-play:hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn-waitlist {
+      font-family: 'Press Start 2P', monospace; font-size: 0.65rem;
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border);
+      padding: 14px 28px; border-radius: 8px; text-decoration: none;
+      transition: border-color 0.15s; display: inline-block; cursor: pointer;
+    }
+    .btn-waitlist:hover { border-color: var(--gray); }
+
+    /* ── MINI RACE PREVIEW ── */
+    .preview {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px;
+      max-width: 320px; margin: 32px auto 0;
+      font-size: 0.7rem;
+    }
+    .preview-header {
+      display: flex; justify-content: space-between;
+      font-size: 0.55rem; color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .preview-seg {
+      text-align: center; padding: 8px;
+      border-radius: 6px; margin-bottom: 12px;
+      font-family: 'Press Start 2P', monospace; font-size: 0.5rem;
+      background: #0f2744; border: 1px solid var(--teal); color: var(--teal);
+    }
+    .preview-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 4px 6px; border-radius: 4px; margin: 2px 0;
+    }
+    .preview-row.player { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); }
+    .preview-pos { width: 24px; font-size: 0.55rem; color: var(--muted); }
+    .preview-pos.gold { color: var(--amber); }
+    .preview-name { flex: 1; font-size: 0.6rem; }
+    .preview-name.red { color: var(--red); }
+    .preview-boost { display: flex; gap: 3px; }
+    .bc { width: 10px; height: 14px; border-radius: 2px; background: var(--amber); }
+    .bc.used { background: var(--border); }
+
+    /* ── HOW IT WORKS ── */
+    .how { padding: 56px 0; border-bottom: 1px solid var(--border); }
+    .section-label {
+      font-size: 0.55rem; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 3px;
+      text-align: center; margin-bottom: 32px;
+    }
+    .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+    .step { text-align: center; }
+    .step-num {
+      font-family: 'Press Start 2P', monospace; font-size: 1.2rem;
+      color: var(--amber); margin-bottom: 12px;
+    }
+    .step-title {
+      font-family: 'Press Start 2P', monospace; font-size: 0.5rem;
+      margin-bottom: 8px; color: var(--text);
+    }
+    .step-desc { font-size: 0.72rem; color: var(--muted); }
+
+    /* ── MECHANICS ── */
+    .mechanics { padding: 56px 0; border-bottom: 1px solid var(--border); }
+    .mech-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+    .mech-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 18px;
+    }
+    .mech-icon { font-size: 1.4rem; margin-bottom: 8px; }
+    .mech-title {
+      font-family: 'Press Start 2P', monospace; font-size: 0.5rem;
+      color: var(--amber); margin-bottom: 6px;
+    }
+    .mech-desc { font-size: 0.7rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── TYRE TABLE ── */
+    .tyre-table { width:100%; border-collapse:collapse; margin-top:16px; font-size:0.72rem; }
+    .tyre-table th {
+      font-family:'Press Start 2P',monospace; font-size:0.45rem;
+      color:var(--muted); text-align:left; padding:8px;
+      border-bottom:1px solid var(--border); text-transform:uppercase;
+    }
+    .tyre-table td { padding:10px 8px; border-bottom:1px solid var(--border); }
+    .tyre-table tr:last-child td { border-bottom:none; }
+
+    /* ── WAITLIST ── */
+    .waitlist-section {
+      padding: 56px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .waitlist-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 32px; text-align: center;
+    }
+    .waitlist-box h2 {
+      font-family: 'Press Start 2P', monospace; font-size: 0.85rem;
+      color: var(--amber); margin-bottom: 10px;
+    }
+    .waitlist-box p { font-size: 0.75rem; color: var(--muted); margin-bottom: 24px; }
+    .form-row { display: flex; gap: 10px; max-width: 420px; margin: 0 auto; }
+    .form-row input[type="email"] {
+      flex: 1; padding: 12px 14px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text);
+      font-family: 'Roboto Mono', monospace; font-size: 0.8rem;
+    }
+    .form-row input[type="email"]:focus {
+      outline: none; border-color: var(--amber);
+    }
+    .form-row button {
+      font-family: 'Press Start 2P', monospace; font-size: 0.5rem;
+      background: var(--amber); color: #0a0c12;
+      border: none; border-radius: 6px; padding: 12px 16px;
+      cursor: pointer; white-space: nowrap; transition: opacity 0.15s;
+    }
+    .form-row button:hover { opacity: 0.85; }
+    .form-row button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .form-note { font-size: 0.65rem; color: var(--gray); margin-top: 12px; }
+    .form-success {
+      display: none; color: var(--green);
+      font-family: 'Press Start 2P', monospace; font-size: 0.6rem;
+      margin-top: 16px;
+    }
+    .form-error {
+      display: none; color: var(--red);
+      font-size: 0.7rem; margin-top: 12px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 32px 0; text-align: center;
+      font-size: 0.65rem; color: var(--gray);
+    }
+    footer a { color: var(--gray); text-decoration: none; }
+    footer a:hover { color: var(--muted); }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:520px) {
+      .steps { grid-template-columns: 1fr; }
+      .mech-grid { grid-template-columns: 1fr; }
+      .form-row { flex-direction: column; }
+      .hero h1 { font-size: 1.1rem; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">🏎️</div>
-        <h1>BOARDURANCE</h1>
-        <p class="tagline">Hyper-casual racing strategy with 8-bit bird's-eye view</p>
-        
-        <div class="features">
-            <div class="feature">
-                <h3>3-5 Minute Sessions</h3>
-                <p>Perfect for quick breaks during your day.</p>
-            </div>
-            <div class="feature">
-                <h3>Data-Driven Decisions</h3>
-                <p>Real-time tire wear, fuel levels, competitor analysis.</p>
-            </div>
-            <div class="feature">
-                <h3>8-bit Visualization</h3>
-                <p>Clean bird's-eye view showing relative positions.</p>
-            </div>
-        </div>
-        
-        <button class="cta" onclick="showWaitlist()">Join Waitlist for Early Access</button>
-        
-        <div class="status" id="status">
-            <p class="success">✅ Landing page deployed successfully!</p>
-            <p>GitHub Pages is working correctly.</p>
-            <p>Full waitlist functionality coming soon.</p>
-        </div>
+
+<!-- NAV -->
+<nav>
+  <div class="container">
+    <span class="nav-logo">FZERO</span>
+    <a href="game.html" class="nav-play">▶ PLAY NOW</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">Zero friction · No signup · Play in 3 seconds</div>
+    <h1>The racing strategy game<br>that fits in your pocket</h1>
+    <p class="hero-sub">
+      Pick your car, tyre, and pilot. Qualify. Race 10 turns against the field.
+      Every decision counts — and it takes under 2 minutes.
+    </p>
+    <div class="hero-ctas">
+      <a href="game.html" class="btn-play">▶ PLAY NOW — FREE</a>
+      <a href="#waitlist" class="btn-waitlist">JOIN WAITLIST</a>
     </div>
 
-    <script>
-        function showWaitlist() {
-            document.getElementById('status').innerHTML = `
-                <p class="success">🎉 Waitlist coming soon!</p>
-                <p>We're preparing the full landing page with waitlist form.</p>
-                <p>Check back in a few minutes for updates.</p>
-            `;
-        }
-        
-        console.log('Boardurance landing page loaded successfully');
-        console.log('GitHub Pages deployment confirmed');
-    </script>
-</body>
-</html>
+    <!-- Mini race preview -->
+    <div class="preview">
+      <div class="preview-header">
+        <span>TURN 7/10</span>
+        <span style="color:var(--amber)">P3</span>
+        <span>MONACO</span>
+      </div>
+      <div class="preview-seg">⤵ CURVE SECTION</div>
+      <div class="preview-row"><span class="preview-pos gold">P1</span><span class="preview-name">LECLERC</span></div>
+      <div class="preview-row"><span class="preview-pos gold">P2</span><span class="preview-name">VERSTAPPEN</span></div>
+      <div class="preview-row player">
+        <span class="preview-pos" style="color:var(--red)">P3</span>
+        <span class="preview-name red">▶ YOU</span>
+        <div class="preview-boost"><div class="bc"></div><div class="bc used"></div><div class="bc used"></div></div>
+      </div>
+      <div class="preview-row"><span class="preview-pos">P4</span><span class="preview-name">HAMILTON</span></div>
+      <div class="preview-row"><span class="preview-pos">P5</span><span class="preview-name">NORRIS</span></div>
+      <div style="margin-top:10px;display:flex;gap:6px;justify-content:center;">
+        <div style="background:var(--blue);border-radius:4px;padding:5px 10px;font-size:0.5rem;color:#fff;">🔧 PIT</div>
+        <div style="background:var(--amber);border-radius:4px;padding:5px 10px;font-size:0.5rem;color:#0a0c12;">⚡ BOOST</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="container">
+    <div class="section-label">How it works</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">BUILD<br>YOUR TEAM</div>
+        <p class="step-desc">Choose a car, pilot, and tyre compound. Each combination unlocks a different strategy.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">QUALIFY<br>THE GRID</div>
+        <p class="step-desc">Play it safe or attack for a better starting position — with real risk if you push too hard.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">RACE<br>10 TURNS</div>
+        <p class="step-desc">Each turn reveals a segment — Straight or Curve. Pit, boost, or hold. Positions update live.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MECHANICS -->
+<section class="mechanics">
+  <div class="container">
+    <div class="section-label">Core mechanics</div>
+    <div class="mech-grid">
+      <div class="mech-card">
+        <div class="mech-icon">🚗</div>
+        <div class="mech-title">CAR PROFILE</div>
+        <p class="mech-desc">Straight specialist, curve specialist, or all-rounder. Your car stat determines value on each segment type.</p>
+      </div>
+      <div class="mech-card">
+        <div class="mech-icon">👤</div>
+        <div class="mech-title">PILOT SKILL</div>
+        <p class="mech-desc">Maneuverability governs your qualifying attack risk. Push hard and roll the dice — or play it safe.</p>
+      </div>
+      <div class="mech-card">
+        <div class="mech-icon">🔴</div>
+        <div class="mech-title">TYRE STRATEGY</div>
+        <p class="mech-desc">Three compounds, three philosophies. Soft burns hot and fast. Hard gives you coverage all race long.</p>
+      </div>
+      <div class="mech-card">
+        <div class="mech-icon">🔧</div>
+        <div class="mech-title">PIT & BOOST</div>
+        <p class="mech-desc">Pit to refill your boost cards — but drop to the back. Time it right and it's a weapon. Time it wrong and the race is over.</p>
+      </div>
+    </div>
+
+    <!-- Tyre table -->
+    <div style="margin-top:32px;">
+      <div class="section-label" style="text-align:left;margin-bottom:12px;">Tyre compounds</div>
+      <table class="tyre-table">
+        <thead>
+          <tr>
+            <th>Compound</th>
+            <th>Cards</th>
+            <th>Boost/card</th>
+            <th>Strategy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>🔴 Soft</td>
+            <td style="color:var(--amber)">2</td>
+            <td style="color:var(--amber)">+5</td>
+            <td style="color:var(--muted)">Explosive — pit early, refill, repeat</td>
+          </tr>
+          <tr>
+            <td>🟡 Medium</td>
+            <td style="color:var(--amber)">3</td>
+            <td style="color:var(--amber)">+3</td>
+            <td style="color:var(--muted)">Balanced — forgiving on timing</td>
+          </tr>
+          <tr>
+            <td>⚪ Hard</td>
+            <td style="color:var(--amber)">4</td>
+            <td style="color:var(--amber)">+2</td>
+            <td style="color:var(--muted)">Marathon — spread across all 10 turns</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- WAITLIST -->
+<section class="waitlist-section" id="waitlist">
+  <div class="container">
+    <div class="waitlist-box">
+      <h2>STAY IN THE LOOP</h2>
+      <p>The game is live and free to play. Drop your email to get notified as new circuits and features drop.</p>
+      <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px;padding:14px;margin:0 0 20px;text-align:left;">
+        <div style="font-family:'Press Start 2P',monospace;font-size:0.45rem;color:var(--amber);margin-bottom:6px;">🏗 SOMETHING BIGGER IS COMING</div>
+        <p style="font-size:0.7rem;color:var(--muted);margin:0;">
+          Fzero is just the beginning. <strong style="color:var(--text);">Boardurance</strong> — a full racing management game with real-time F1 data, team economics, community leagues and deep season strategy — is in active development. Waitlist members get early access.
+        </p>
+      </div>
+      <div class="form-row">
+        <input type="email" id="waitlist-email" placeholder="your@email.com" autocomplete="email">
+        <button onclick="submitWaitlist()" id="waitlist-btn">JOIN →</button>
+      </div>
+      <p class="form-note">No spam. Unsubscribe anytime.</p>
+      <div class="form-success" id="form-success">✓ YOU'RE IN — THANKS!</div>
+      <div class="form-error"   id="form-error"></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p style="margin-bottom:8px;">
+      <span class="pixel" style="color:var(--amber);font-size:0.6rem;">FZERO</span>
+    </p>
+    <p>A zero-friction racing strategy game · <a href="game.html">Play now</a></p>
+    <p style="margin-top:8px;">© 2026 Boardurance</p>
+  </div>
+</footer>
+
+<script>
+  // ── WAITLIST ──────────────────────────────────────────────────────────────
+  // Replace APPS_SCRIPT_URL with your deployed Google Apps Script Web App URL
+  // See WAITLIST_SETUP.md for instructions
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzLaPomHuayJsl_Y8WQcbTfeKC8oObn-K_Zxl2r73hbZC2H1657Fwum-kN7dHKHZKRZvA/exec';
+
+  async function submitWaitlist() {
+    const emailInput = document.getElementById('waitlist-email');
+    const btn        = document.getElementById('waitlist-btn');
+    const success    = document.getElementById('form-success');
+    const error      = document.getElementById('form-error');
+    const email      = emailInput.value.trim();
+
+    // Validate
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      error.textContent = 'Please enter a valid email address.';
+      error.style.display = 'block';
+      return;
+    }
+    error.style.display   = 'none';
+    success.style.display = 'none';
+
+    // Check URL is configured
+    if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+      // Dev mode: just show success without posting
+      success.style.display = 'block';
+      emailInput.value = '';
+      return;
+    }
+
+    btn.disabled     = true;
+    btn.textContent  = '...';
+
+    try {
+      await fetch(APPS_SCRIPT_URL, {
+        method:  'POST',
+        mode:    'no-cors', // Apps Script requires no-cors
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          email,
+          source:    'landing_page',
+          timestamp: new Date().toISOString(),
+        }),
+      });
+      // no-cors means we can't read the response — assume success if no throw
+      success.style.display = 'block';
+      emailInput.value = '';
+    } catch (err) {
+      error.textContent   = 'Something went wrong. Please try again.';
+      error.style.display = 'block';
+    } finally {
+      btn.disabled    = false;
+      btn.textContent = 'JOIN →';
+    }
+  }
+
+  // Allow Enter key to submit
+  document.getElementById('waitlist-email').addEventListener('keydown', e => {
+    if (e.key === 'Enter') submitWaitlist();
+  });
+
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelector(a.getAttribute('href'))
+ 
