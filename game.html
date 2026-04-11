@@ -899,11 +899,11 @@ function nextTurn() {
       aiPitsThisTurn++;
       return { ...entry, value: -9999, pitThisTurn: true };
     }
-    // Normal turn value: car_seg_stat × 10 + pilot quickness
+    // Normal turn value: car_seg_stat only (0-10 scale, no quickness, no ×10)
     const stat  = seg === 'curve' ? entry.car.curve : entry.car.straight;
-    const base  = stat * 10 + entry.quickness;
+    const base  = stat;
     const boost = entry.isPlayer && isBoost ? state.selectedTire.boost : 0;
-    const noise = entry.isPlayer ? 0 : (Math.random() * 30) - 15; // AI variance ±15
+    const noise = entry.isPlayer ? 0 : (Math.random() * 3) - 1.5; // AI variance ±1.5
     return { ...entry, value: base + boost + noise, pitThisTurn: false };
   });
 
