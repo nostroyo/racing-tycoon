@@ -256,6 +256,59 @@
     /* ── Divider ── */
     .divider { border:none; border-top:1px solid var(--border); margin:16px 0; }
 
+    /* ── LED Marquee ── */
+    .led-marquee-wrap {
+      position: relative;
+      background: #050800;
+      border: 2px solid #1a2200;
+      border-radius: 6px;
+      padding: 6px 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 12px rgba(180,255,0,0.08), inset 0 0 20px rgba(0,0,0,0.6);
+    }
+    .led-scanlines {
+      position: absolute; inset: 0; pointer-events: none; z-index: 2;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 2px,
+        rgba(0,0,0,0.25) 2px, rgba(0,0,0,0.25) 4px
+      );
+    }
+    .led-inner {
+      display: flex; align-items: center; gap: 6px; position: relative; z-index: 1;
+    }
+    .led-dot {
+      font-family: monospace; font-size: 0.55rem;
+      color: #6aff00; opacity: 0.5;
+      animation: led-blink 1.2s step-start infinite;
+      flex-shrink: 0;
+    }
+    .led-dot-r { animation-delay: 0.6s; }
+    .led-scroll-clip {
+      flex: 1; overflow: hidden; position: relative;
+    }
+    .led-scroll-track {
+      display: inline-block;
+      white-space: nowrap;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.6rem;
+      color: #b4ff00;
+      text-shadow: 0 0 8px #b4ff00, 0 0 16px rgba(180,255,0,0.4);
+      letter-spacing: 3px;
+      animation: led-scroll linear infinite;
+      will-change: transform;
+      padding-left: 100%;
+    }
+    @keyframes led-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    @keyframes led-blink {
+      0%, 49% { opacity: 0.8; color: #b4ff00; }
+      50%, 100%{ opacity: 0.2; color: #3a6000; }
+    }
+
     /* ── Anim ── */
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
     .pulse { animation: pulse 1s infinite; }
@@ -329,7 +382,17 @@
      SCREEN 3 — RACE
 ════════════════════════════════════════════════ -->
 <div id="screen-race" class="screen">
-  <div id="race-gp-title" class="pixel" style="font-size:0.5rem;color:var(--muted);text-align:center;margin-bottom:10px;"></div>
+  <!-- ── LED Marquee ── -->
+  <div class="led-marquee-wrap">
+    <div class="led-scanlines"></div>
+    <div class="led-inner">
+      <span class="led-dot led-dot-l">◀</span>
+      <div class="led-scroll-clip">
+        <div class="led-scroll-track" id="led-track"></div>
+      </div>
+      <span class="led-dot led-dot-r">▶</span>
+    </div>
+  </div>
   <div class="race-header">
     <div class="race-stat">
       <div class="race-stat-val" id="turn-display">1/10</div>
@@ -723,8 +786,13 @@ function startRace() {
 
   showScreen('screen-race');
 
-  // Show GP name above race header
-  document.getElementById('race-gp-title').textContent = `${CIRCUIT.flag} ${CIRCUIT.gp}`;
+  // LED marquee — duplicate text for seamless loop
+  const ledText = `${CIRCUIT.flag}  ${CIRCUIT.gp.toUpperCase()}  ★  ${CIRCUIT.flag}  ${CIRCUIT.gp.toUpperCase()}  ★  `;
+  const track = document.getElementById('led-track');
+  track.textContent = ledText + ledText; // doubled for infinite loop
+  // Speed: ~60px/s feel — compute duration from char count
+  const charCount = ledText.length;
+  track.style.animationDuration = (charCount * 0.18) + 's';
 
   renderTurn();
 }
