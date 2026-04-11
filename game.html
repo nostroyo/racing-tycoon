@@ -416,18 +416,18 @@ const PILOTS = [
   { id:'blade', name:'BLADE', emoji:'🗡', maneuverability:75, quickness:80, desc:'Balanced racer'  },
 ];
 
-// AI opponents — pre-defined quali scores and race stats
+// AI opponents — qualiScore computed dynamically from circuit type in runQuali()
 const AI_OPPONENTS = [
-  { name:'VERSTAPPEN', qualiScore:340, straight:9, curve:9  },
-  { name:'LECLERC',    qualiScore:320, straight:7, curve:9  },
-  { name:'HAMILTON',   qualiScore:305, straight:8, curve:8  },
-  { name:'ALONSO',     qualiScore:290, straight:6, curve:8  },
-  { name:'NORRIS',     qualiScore:275, straight:8, curve:7  },
-  { name:'SAINZ',      qualiScore:260, straight:7, curve:7  },
-  { name:'PIASTRI',    qualiScore:245, straight:6, curve:7  },
-  { name:'RUSSELL',    qualiScore:230, straight:7, curve:6  },
-  { name:'PEREZ',      qualiScore:215, straight:8, curve:5  },
-  { name:'BOTTAS',     qualiScore:195, straight:7, curve:4  },
+  { name:'VERSTAPPEN', quickness:95, straight:9, curve:9  },
+  { name:'LECLERC',    quickness:88, straight:7, curve:9  },
+  { name:'HAMILTON',   quickness:85, straight:8, curve:8  },
+  { name:'ALONSO',     quickness:80, straight:6, curve:8  },
+  { name:'NORRIS',     quickness:78, straight:8, curve:7  },
+  { name:'SAINZ',      quickness:72, straight:7, curve:7  },
+  { name:'PIASTRI',    quickness:68, straight:6, curve:7  },
+  { name:'RUSSELL',    quickness:65, straight:7, curve:6  },
+  { name:'PEREZ',      quickness:60, straight:8, curve:5  },
+  { name:'BOTTAS',     quickness:55, straight:7, curve:4  },
 ];
 
 // Monaco circuit: 10 turns, curve-heavy (7C / 3S)
@@ -617,7 +617,8 @@ function goToQuali() {
   const car   = state.selectedCar;
   const pilot = state.selectedPilot;
   const circuitStat = CIRCUIT.type === 'curve' ? car.curve : car.straight;
-  const base = (circuitStat * 10) + pilot.maneuverability;
+  const base = circuitStat * 10;
+  const trackLabel = CIRCUIT.type === 'curve' ? 'CURVE' : 'STRAIGHT';
 
   // Reset quali UI
   document.getElementById('roll-result').classList.remove('show');
@@ -627,12 +628,11 @@ function goToQuali() {
   document.querySelectorAll('.btn-safe, .btn-attack').forEach(b => b.disabled = false);
 
   document.getElementById('quali-formula').innerHTML = `
-    <div class="formula-line"><span>Car curve stat × 10</span><span>${circuitStat} × 10 = ${circuitStat * 10}</span></div>
-    <div class="formula-line"><span>Pilot maneuverability</span><span>+ ${pilot.maneuverability}</span></div>
+    <div class="formula-line"><span>Car ${trackLabel} stat × 10</span><span>${circuitStat} × 10 = ${base}</span></div>
     <div class="formula-total"><span>BASE SCORE</span><span>${base}</span></div>
     <div style="margin-top:10px;font-size:0.65rem;color:var(--muted);">
-      SAFE adds +Quickness(${pilot.quickness}) &nbsp;|&nbsp;
-      ATTACK rolls D100 vs Maneuv(${pilot.maneuverability}) → ×2 or ÷2
+      SAFE adds +Quickness(${pilot.quickness}) → total ${base + pilot.quickness} &nbsp;|&nbsp;
+      ATTACK rolls D100 vs Maneuv(${pilot.maneuverability}) → Quickness ×2 or ÷2
     </div>
   `;
 }
@@ -643,7 +643,7 @@ function runQuali(mode) {
   const car   = state.selectedCar;
   const pilot = state.selectedPilot;
   const circuitStat = CIRCUIT.type === 'curve' ? car.curve : car.straight;
-  const base  = (circuitStat * 10) + pilot.maneuverability;
+  const base  = circuitStat * 10;
 
   let bonus = 0;
   let rollHtml = '';
@@ -673,16 +673,22 @@ function runQuali(mode) {
   state.qualiMode  = mode;
   state.stats.qualiScore = state.qualiScore;
 
-  // Build full grid and sort
+  // Build full grid and sort — AI scores computed from circuit type (always "safe")
   const allEntries = [
-    ...AI_OPPONENTS.map(ai => ({
-      name: ai.name, isPlayer: false,
-      car: { straight: ai.straight, curve: ai.curve },
-      qualiScore: ai.qualiScore,
-    })),
+    ...AI_OPPONENTS.map(ai => {
+      const aiStat  = CIRCUIT.type === 'curve' ? ai.curve : ai.straight;
+      const aiScore = aiStat * 10 + ai.quickness;
+      return {
+        name: ai.name, isPlayer: false,
+        car: { straight: ai.straight, curve: ai.curve },
+        quickness: ai.quickness,
+        qualiScore: aiScore,
+      };
+    }),
     {
       name: 'YOU', isPlayer: true,
       car: { straight: car.straight, curve: car.curve },
+      quickness: pilot.quickness,
       qualiScore: state.qualiScore,
     },
   ];
@@ -789,11 +795,12 @@ function renderPositionGrid(highlight) {
       else if (delta < 0) deltaHtml = `<span class="pos-delta down">▼${Math.abs(delta)}</span>`;
       else                deltaHtml = `<span class="pos-delta same">—</span>`;
     }
-    const isPitting = state.turnAction === 'pit' && entry.isPlayer;
+    const isPitting = entry.pitThisTurn || (state.turnAction === 'pit' && entry.isPlayer);
+    const pitLabel  = isPitting ? ' <span style="color:var(--blue);font-size:0.6rem;">🔧 PIT</span>' : '';
     return `
       <div class="pos-row ${entry.isPlayer ? 'player' : ''} ${isPitting ? 'pitting' : ''}">
         <span class="pos-num ${entry.position <= 3 ? 'top3' : ''}">P${entry.position}</span>
-        <span class="pos-car ${entry.isPlayer ? 'player-name' : ''}">${entry.name}${isPitting ? ' (pit)' : ''}</span>
+        <span class="pos-car ${entry.isPlayer ? 'player-name' : ''}">${entry.name}${pitLabel}</span>
         ${deltaHtml}
       </div>`;
   }).join('');
@@ -883,33 +890,40 @@ function nextTurn() {
   // Save previous positions
   state.positions.forEach(e => { e.prevPosition = e.position; });
 
+  // AI pit decisions — up to 2 AI can pit per turn, ~10% chance each
+  const AI_PIT_CHANCE = 0.10;
+  const MAX_AI_PITS   = 2;
+  let aiPitsThisTurn  = 0;
+
   // Compute values
   const valued = state.positions.map(entry => {
+    // Player pit → goes to back
     if (entry.isPlayer && isPit) {
-      return { ...entry, value: -9999 }; // goes to back
+      return { ...entry, value: -9999, pitThisTurn: true };
     }
-    const stat    = seg === 'curve' ? entry.car.curve : entry.car.straight;
-    const base    = 80 + 40 + stat;
-    const boost   = entry.isPlayer && isBoost ? state.selectedTire.boost : 0;
-    const noise   = entry.isPlayer ? 0 : (Math.random() * 1.5) - 0.75; // AI variance ±0.75
-    return { ...entry, value: base + boost + noise };
+    // AI pit decision
+    if (!entry.isPlayer && aiPitsThisTurn < MAX_AI_PITS && Math.random() < AI_PIT_CHANCE) {
+      aiPitsThisTurn++;
+      return { ...entry, value: -9999, pitThisTurn: true };
+    }
+    // Normal turn value: car_seg_stat × 10 + pilot quickness
+    const stat  = seg === 'curve' ? entry.car.curve : entry.car.straight;
+    const base  = stat * 10 + entry.quickness;
+    const boost = entry.isPlayer && isBoost ? state.selectedTire.boost : 0;
+    const noise = entry.isPlayer ? 0 : (Math.random() * 30) - 15; // AI variance ±15
+    return { ...entry, value: base + boost + noise, pitThisTurn: false };
   });
 
-  // Sort descending by value → assign positions
+  // Sort descending by value (pitters have -9999 → natural last)
   valued.sort((a, b) => b.value - a.value);
-  valued.forEach((entry, idx) => { entry.position = idx + 1; });
+  // Separate pitters to the very back in order
+  const nonPitters = valued.filter(e => !e.pitThisTurn);
+  const pitters    = valued.filter(e =>  e.pitThisTurn);
+  [...nonPitters, ...pitters].forEach((entry, idx) => { entry.position = idx + 1; });
 
-  // Handle pit: drop player to last, equally space among any other pitters
-  // (in MVP only player can pit)
-  if (isPit) {
-    const nonPitters = valued.filter(e => !e.isPlayer || !isPit);
-    const pitters    = valued.filter(e =>  e.isPlayer &&  isPit);
-    [...nonPitters, ...pitters].forEach((entry, idx) => { entry.position = idx + 1; });
-  }
+  state.positions = [...nonPitters, ...pitters];
 
-  state.positions = valued;
-
-  // Pit effects
+  // Pit effects (player)
   if (isPit) {
     state.boostCards = state.selectedTire.cards; // refill to full hand
     state.stats.pitted++;
