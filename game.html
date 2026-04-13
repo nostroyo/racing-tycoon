@@ -777,6 +777,7 @@ function startRace() {
     ...entry,
     position:     idx + 1,
     prevPosition: idx + 1,
+    score:        0,          // cumulative score — positions sorted by this each turn
   }));
   state.turn       = 0;
   state.boostCards = state.selectedTire.cards;
@@ -956,29 +957,32 @@ function nextTurn() {
   const MAX_AI_PITS   = 2;
   let aiPitsThisTurn  = 0;
 
-  // Compute values
+  // Compute per-turn values
   const valued = state.positions.map(entry => {
-    // Player pit → goes to back
+    // Player pit → goes to back, earns 0 score this turn (time lost in pits)
     if (entry.isPlayer && isPit) {
-      return { ...entry, value: -9999, pitThisTurn: true };
+      return { ...entry, value: 0, pitThisTurn: true };
     }
     // AI pit decision
     if (!entry.isPlayer && aiPitsThisTurn < MAX_AI_PITS && Math.random() < AI_PIT_CHANCE) {
       aiPitsThisTurn++;
-      return { ...entry, value: -9999, pitThisTurn: true };
+      return { ...entry, value: 0, pitThisTurn: true };
     }
-    // Normal turn value: car_seg_stat only (0-10 scale, no quickness, no ×10)
+    // Normal turn value: car_seg_stat only (0-10 scale)
     const stat  = seg === 'curve' ? entry.car.curve : entry.car.straight;
-    const base  = stat;
     const boost = entry.isPlayer && isBoost ? state.selectedTire.boost : 0;
     const noise = entry.isPlayer ? 0 : (Math.random() * 3) - 1.5; // AI variance ±1.5
-    return { ...entry, value: base + boost + noise, pitThisTurn: false };
+    return { ...entry, value: stat + boost + noise, pitThisTurn: false };
   });
 
-  // Sort descending by value (pitters have -9999 → natural last)
-  valued.sort((a, b) => b.value - a.value);
-  // Separate pitters to the very back in order
-  const nonPitters = valued.filter(e => !e.pitThisTurn);
+  // ── Cumulative score system ──────────────────────────────────────────────
+  // Each car accumulates score across all turns. Positions are sorted by
+  // cumulative score — not per-turn value — so a car must sustain an
+  // advantage to overtake, preventing ±7 swings from single segment changes.
+  valued.forEach(e => { e.score = (e.score || 0) + e.value; });
+
+  // Non-pitters sorted by cumulative score; pitters appended at the back
+  const nonPitters = valued.filter(e => !e.pitThisTurn).sort((a, b) => b.score - a.score);
   const pitters    = valued.filter(e =>  e.pitThisTurn);
   [...nonPitters, ...pitters].forEach((entry, idx) => { entry.position = idx + 1; });
 
