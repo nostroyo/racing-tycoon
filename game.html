@@ -665,16 +665,14 @@ function checkSetupReady() {
 function goToQuali() {
   showScreen('screen-quali');
 
-  // Update subtitle dynamically
-  const straightPct = 100 - CIRCUIT.curvePct;
+  // Update subtitle dynamically — circuit type intentionally hidden (player must guess from GP knowledge)
   document.getElementById('quali-subtitle').textContent =
-    `${CIRCUIT.flag} ${CIRCUIT.gp} · ${CIRCUIT.turns} turns · ${CIRCUIT.curvePct}% curves / ${straightPct}% straights`;
+    `${CIRCUIT.flag} ${CIRCUIT.gp} · ${CIRCUIT.turns} turns`;
 
   const car   = state.selectedCar;
   const pilot = state.selectedPilot;
   const circuitStat = CIRCUIT.type === 'curve' ? car.curve : car.straight;
   const base = circuitStat * 10;
-  const trackLabel = CIRCUIT.type === 'curve' ? 'CURVE' : 'STRAIGHT';
 
   // Reset quali UI
   document.getElementById('roll-result').classList.remove('show');
@@ -684,7 +682,7 @@ function goToQuali() {
   document.querySelectorAll('.btn-safe, .btn-attack').forEach(b => b.disabled = false);
 
   document.getElementById('quali-formula').innerHTML = `
-    <div class="formula-line"><span>Car ${trackLabel} stat × 10</span><span>${circuitStat} × 10 = ${base}</span></div>
+    <div class="formula-line"><span>Car circuit stat × 10</span><span>${circuitStat} × 10 = ${base}</span></div>
     <div class="formula-total"><span>BASE SCORE</span><span>${base}</span></div>
     <div style="margin-top:10px;font-size:0.65rem;color:var(--muted);">
       SAFE adds +Quickness(${pilot.quickness}) → total ${base + pilot.quickness} &nbsp;|&nbsp;
